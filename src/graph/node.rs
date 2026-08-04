@@ -141,9 +141,30 @@ impl From<bool> for Value {
     }
 }
 
+impl From<i64> for Value {
+    fn from(n: i64) -> Self {
+        Value::Number(n.into())
+    }
+}
+
+impl From<u64> for Value {
+    fn from(n: u64) -> Self {
+        Value::Number(n.into())
+    }
+}
+
 impl From<Reference> for Value {
     fn from(r: Reference) -> Self {
         Value::Reference(r)
+    }
+}
+
+impl From<Vec<Value>> for Value {
+    fn from(values: Vec<Value>) -> Self {
+        match <[Value; 1]>::try_from(values) {
+            Ok([single]) => single,
+            Err(many) => Value::List(many),
+        }
     }
 }
 

@@ -39,9 +39,14 @@ fn definitions_of(iri: &str) -> Option<&'static [(&'static str, &'static str)]> 
 
 /// Any `https://w3id.org/ro/crate/<version>/context`.
 fn is_base_context(iri: &str) -> bool {
+    base_context_version(iri).is_some()
+}
+
+/// The RO-Crate version a base context document is for.
+pub fn base_context_version(iri: &str) -> Option<&str> {
     normalize(iri)
-        .strip_prefix("w3id.org/ro/crate/")
-        .is_some_and(|rest| rest.ends_with("/context"))
+        .strip_prefix("w3id.org/ro/crate/")?
+        .strip_suffix("/context")
 }
 
 /// Ignores the `http`/`https` split and a trailing slash, both of which show
