@@ -2,6 +2,7 @@ use crate::constants::{
     BASE_TERMS, TEST_CONTEXT, TEST_TERMS, WORKFLOW_RUN_CONTEXT, WORKFLOW_RUN_TERMS,
 };
 
+#[must_use]
 pub fn context_defines(iri: &str, term: &str) -> bool {
     match definitions_of(iri) {
         Some(terms) => terms.iter().any(|(name, _)| *name == term),
@@ -10,6 +11,7 @@ pub fn context_defines(iri: &str, term: &str) -> bool {
 }
 
 /// The context document that defines `term`, for crates that need one added.
+#[must_use]
 pub fn defining_context(term: &str) -> Option<&'static str> {
     if WORKFLOW_RUN_TERMS.iter().any(|(name, _)| *name == term) {
         Some(WORKFLOW_RUN_CONTEXT)
@@ -21,6 +23,7 @@ pub fn defining_context(term: &str) -> Option<&'static str> {
 }
 /// The IRI a term expands to, for crates that inline definitions instead of
 /// referencing the context document.
+#[must_use]
 pub fn expansion(term: &str) -> Option<&'static str> {
     WORKFLOW_RUN_TERMS
         .iter()
@@ -43,6 +46,7 @@ fn is_base_context(iri: &str) -> bool {
 }
 
 /// The RO-Crate version a base context document is for.
+#[must_use]
 pub fn base_context_version(iri: &str) -> Option<&str> {
     normalize(iri)
         .strip_prefix("w3id.org/ro/crate/")?

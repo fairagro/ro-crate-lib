@@ -88,6 +88,7 @@ impl RoCrate {
 
     /// Data entities that live in the crate directory, rather than out on the
     /// web or inside the metadata itself.
+    #[must_use]
     pub fn local_parts(&self) -> Vec<&str> {
         self.data_entities()
             .into_iter()
@@ -130,7 +131,7 @@ pub(crate) fn parse(path: &Path, source: String) -> Result<RoCrate> {
     }
 }
 
-/// Turns serde_json's line and column into an offset miette can point at.
+/// Turns `serde_json`'s line and column into an offset miette can point at.
 fn span_of(source: &str, error: &serde_json::Error) -> SourceSpan {
     let mut offset = 0;
     for (number, line) in source.lines().enumerate() {

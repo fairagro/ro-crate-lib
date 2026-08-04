@@ -9,18 +9,21 @@ use crate::terms;
 pub struct Context(pub OneOrMany<ContextItem>);
 
 impl Context {
+    #[must_use]
     pub fn ro_crate_1_1() -> Self {
         Context(OneOrMany::One(ContextItem::Reference(
             crate::constants::RO_CRATE_1_1_CONTEXT.to_string(),
         )))
     }
 
+    #[must_use]
     pub fn ro_crate_1_2() -> Self {
         Context(OneOrMany::One(ContextItem::Reference(
             crate::constants::RO_CRATE_1_2_CONTEXT.to_string(),
         )))
     }
 
+    #[must_use]
     pub fn ro_crate_1_3() -> Self {
         Context(OneOrMany::One(ContextItem::Reference(
             crate::constants::RO_CRATE_1_3_CONTEXT.to_string(),
@@ -36,6 +39,7 @@ impl Context {
     }
 
     /// Whether `term` is usable in this crate
+    #[must_use]
     pub fn defines(&self, term: &str) -> bool {
         self.items().any(|entry| match entry {
             ContextItem::Definitions(definitions) => definitions.contains_key(term),
@@ -44,6 +48,7 @@ impl Context {
     }
 
     /// The IRI `term` expands to, when the crate defines it inline.
+    #[must_use]
     pub fn definition(&self, term: &str) -> Option<&str> {
         self.items().find_map(|entry| match entry {
             ContextItem::Definitions(definitions) => definitions.get(term).map(String::as_str),

@@ -21,14 +21,17 @@ impl GraphNode {
         }
     }
 
+    #[must_use]
     pub fn has_type(&self, type_name: &str) -> bool {
         self.types.iter().any(|t| t == type_name)
     }
 
+    #[must_use]
     pub fn has_types(&self, type_names: &[&str]) -> bool {
         type_names.iter().all(|t| self.has_type(t))
     }
 
+    #[must_use]
     pub fn get(&self, term: &str) -> Option<&Value> {
         self.properties.get(term)
     }
@@ -53,6 +56,7 @@ impl GraphNode {
         self
     }
 
+    #[must_use]
     pub fn reference(&self) -> Reference {
         Reference::new(self.id.clone())
     }
@@ -61,6 +65,7 @@ impl GraphNode {
         self.get(term).into_iter().flat_map(Value::refs)
     }
 
+    #[must_use]
     pub fn text(&self, term: &str) -> Option<&str> {
         self.get(term)?.as_str()
     }
@@ -85,6 +90,7 @@ pub enum Value {
 }
 
 impl Value {
+    #[must_use]
     pub fn as_str(&self) -> Option<&str> {
         match self {
             Value::Text(s) => Some(s),
@@ -92,6 +98,7 @@ impl Value {
         }
     }
 
+    #[must_use]
     pub fn as_bool(&self) -> Option<bool> {
         match self {
             Value::Bool(b) => Some(*b),
@@ -100,6 +107,7 @@ impl Value {
     }
 
     /// The `@id` of a single reference value.
+    #[must_use]
     pub fn as_ref_id(&self) -> Option<&str> {
         match self {
             Value::Reference(r) => Some(&r.id),
@@ -107,6 +115,7 @@ impl Value {
         }
     }
 
+    #[must_use]
     pub fn items(&self) -> OneOrManyRef<'_, Value> {
         match self {
             Value::List(items) => OneOrManyRef::new_from_slice(items),

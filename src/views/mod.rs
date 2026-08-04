@@ -84,11 +84,13 @@ pub trait View<'a>: Sized {
 impl RoCrate {
     /// A typed view of `id`, when that entity carries the view's types and the
     /// context defines the terms the view reads.
+    #[must_use]
     pub fn view<'a, V: View<'a>>(&'a self, id: &str) -> Option<V> {
         V::try_new(self, self.graph.get(id)?)
     }
 
     /// Every entity the view applies to, in document order.
+    #[must_use]
     pub fn views<'a, V: View<'a>>(&'a self) -> Vec<V> {
         self.graph
             .iter()
@@ -96,11 +98,13 @@ impl RoCrate {
             .collect()
     }
 
+    #[must_use]
     pub fn root_dataset(&self) -> Option<RootDataset<'_>> {
         RootDataset::try_new(self, self.root()?)
     }
 
     /// The main workflow of a Workflow RO-Crate.
+    #[must_use]
     pub fn workflow(&self) -> Option<Workflow<'_>> {
         Workflow::try_new(self, self.main_entity()?)
     }

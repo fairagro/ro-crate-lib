@@ -19,13 +19,10 @@ impl Graph {
     }
 
     pub fn insert(&mut self, node: GraphNode) -> Option<GraphNode> {
-        match self.index.get(&node.id) {
-            Some(&position) => Some(std::mem::replace(&mut self.nodes[position], node)),
-            None => {
-                self.index.insert(node.id.clone(), self.nodes.len());
-                self.nodes.push(node);
-                None
-            }
+        if let Some(&position) = self.index.get(&node.id) { Some(std::mem::replace(&mut self.nodes[position], node)) } else {
+            self.index.insert(node.id.clone(), self.nodes.len());
+            self.nodes.push(node);
+            None
         }
     }
 
@@ -36,10 +33,12 @@ impl Graph {
         Some(removed)
     }
 
+    #[must_use]
     pub fn contains(&self, id: &str) -> bool {
         self.index.contains_key(id)
     }
 
+    #[must_use]
     pub fn get(&self, id: &str) -> Option<&GraphNode> {
         self.index.get(id).map(|&position| &self.nodes[position])
     }
@@ -49,6 +48,7 @@ impl Graph {
         self.nodes.get_mut(position)
     }
 
+    #[must_use]
     pub fn resolve_reference(&self, reference: &Reference) -> Option<&GraphNode> {
         self.get(&reference.id)
     }
@@ -61,15 +61,18 @@ impl Graph {
         self.nodes.iter_mut()
     }
 
+    #[must_use]
     pub fn len(&self) -> usize {
         self.nodes.len()
     }
 
+    #[must_use]
     pub fn is_empty(&self) -> bool {
         self.nodes.is_empty()
     }
 
     /// `@id`s appearing more than once, in document order.
+    #[must_use]
     pub fn duplicate_ids(&self) -> Vec<&str> {
         let mut seen = HashMap::new();
         let mut duplicates = Vec::new();

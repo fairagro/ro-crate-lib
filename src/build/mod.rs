@@ -251,10 +251,10 @@ fn sort_profiles(profiles: &[Profile], context: &Context) -> (Vec<Reference>, Ve
         let reference = Reference::new(profile.iri());
         match profile {
             Profile::RoCrate(_) | Profile::WorkflowRoCrate(_) | Profile::Other(_) => {
-                on_descriptor.push(reference)
+                on_descriptor.push(reference);
             }
             Profile::ProcessRun(_) | Profile::WorkflowRun(_) | Profile::ProvenanceRun(_) => {
-                on_root.push(reference)
+                on_root.push(reference);
             }
         }
     }
@@ -279,14 +279,14 @@ fn context_version(context: &Context) -> Option<String> {
 }
 
 fn ensure_all_terms(context: &mut Context, graph: &Graph) {
-    for node in graph.iter() {
+    for node in graph {
         ensure_terms(context, node);
     }
 }
 
 /// Pulls in the context documents an entity's types and terms need.
 fn ensure_terms(context: &mut Context, node: &GraphNode) {
-    for type_name in node.types.iter() {
+    for type_name in &node.types {
         context.ensure(type_name);
     }
     for (term, value) in &node.properties {

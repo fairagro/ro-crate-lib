@@ -30,6 +30,7 @@ pub struct RoCrate {
 
 impl RoCrate {
     /// The metadata descriptor: the `CreativeWork` that is `about` the root.
+    #[must_use]
     pub fn descriptor(&self) -> Option<&GraphNode> {
         self.graph
             .iter()
@@ -38,6 +39,7 @@ impl RoCrate {
     }
 
     /// The root data entity, via the descriptor's `about`.
+    #[must_use]
     pub fn root(&self) -> Option<&GraphNode> {
         self.descriptor()
             .and_then(|descriptor| descriptor.iris("about").next())
@@ -51,6 +53,7 @@ impl RoCrate {
     }
 
     /// The root's `mainEntity` — the main workflow, in a Workflow RO-Crate.
+    #[must_use]
     pub fn main_entity(&self) -> Option<&GraphNode> {
         let id = self.root()?.iris("mainEntity").next()?;
         self.graph.get(id)
@@ -79,12 +82,14 @@ impl RoCrate {
     }
 
     /// Whether the crate claims `profile`, at any version.
+    #[must_use]
     pub fn claims(&self, profile: &Profile) -> bool {
         self.profiles().iter().any(|p| p.is_same_profile(profile))
     }
 
     /// The entities reachable from the root by `hasPart`, in breadth-first
     /// order. Nested `Dataset` parts are followed.
+    #[must_use]
     pub fn data_entities(&self) -> Vec<&GraphNode> {
         let Some(root) = self.root() else {
             return Vec::new();
@@ -106,6 +111,7 @@ impl RoCrate {
     }
 
     /// Everything that is neither the root, the descriptor, nor a data entity.
+    #[must_use]
     pub fn contextual_entities(&self) -> Vec<&GraphNode> {
         let data = self.data_entities();
         let is_root_or_descriptor = |node: &GraphNode| {

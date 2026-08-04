@@ -105,6 +105,7 @@ pub struct Validation {
 
 impl Validation {
     /// The profiles that were checked.
+    #[must_use]
     pub fn profiles(&self) -> &[Profile] {
         &self.profiles
     }
@@ -123,10 +124,12 @@ impl Validation {
 
     /// Whether the crate breaks no `Must` rule. `Should` violations still leave
     /// a crate conformant.
+    #[must_use]
     pub fn is_conformant(&self) -> bool {
         self.errors().next().is_none()
     }
 
+    #[must_use]
     pub fn broke(&self, rule: &str) -> bool {
         self.violations.iter().any(|v| v.rule == rule)
     }
@@ -155,11 +158,13 @@ impl Validation {
 
 impl RoCrate {
     /// Check the crate against base RO-Crate plus every profile it claims.
+    #[must_use]
     pub fn validate(&self) -> Validation {
         self.validate_profiles(self.profiles())
     }
 
     /// Check the crate against one profile, claimed or not.
+    #[must_use]
     pub fn validate_as(&self, profile: &Profile) -> Validation {
         self.validate_profiles(vec![profile.clone()])
     }
@@ -178,7 +183,7 @@ impl RoCrate {
                 Profile::ProcessRun(_) => process = true,
                 Profile::WorkflowRun(_) => (wroc, process, workflow_run) = (true, true, true),
                 Profile::ProvenanceRun(_) => {
-                    (wroc, process, workflow_run, provenance) = (true, true, true, true)
+                    (wroc, process, workflow_run, provenance) = (true, true, true, true);
                 }
                 Profile::RoCrate(_) | Profile::Other(_) => {}
             }

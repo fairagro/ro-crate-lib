@@ -44,6 +44,7 @@ impl Profile {
     }
 
     /// The version segment, for the profiles that carry one.
+    #[must_use]
     pub fn version(&self) -> Option<&str> {
         match self {
             Profile::Other(_) => None,
@@ -56,10 +57,12 @@ impl Profile {
     }
 
     /// Whether this is the same profile as `other`, ignoring versions.
+    #[must_use]
     pub fn is_same_profile(&self, other: &Profile) -> bool {
         std::mem::discriminant(self) == std::mem::discriminant(other)
     }
 
+    #[must_use]
     pub fn iri(&self) -> String {
         let base = match self {
             Profile::RoCrate(_) => RO_CRATE_PROFILE,
