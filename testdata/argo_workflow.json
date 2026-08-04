@@ -1,0 +1,130 @@
+{
+  "@context": [
+    "https://w3id.org/ro/crate/1.1/context"
+  ],
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "about": {
+        "@id": "./"
+      },
+      "conformsTo": [
+        {
+          "@id": "https://w3id.org/ro/crate/1.1"
+        },
+        {
+          "@id": "https://w3id.org/workflowhub/workflow-ro-crate/1.0"
+        }
+      ]
+    },
+    {
+      "@id": "./",
+      "@type": "Dataset",
+      "name": "Workflow for species distribution modeling with ModGP",
+      "author": {
+        "@id": "https://orcid.org/0000-0001-9447-460X"
+      },
+      "conformsTo": [
+        {
+          "@id": "https://w3id.org/workflowhub/workflow-ro-crate/1.0"
+        }
+      ],
+      "dateCreated": "2024-11-04T14:25:49.698Z",
+      "dateModified": "2024-11-04T14:25:48.125Z",
+      "datePublished": "2024-11-04T14:25:48.125Z",
+      "description": "Crop Wild Relatives distribution modeling workflow using ModGP for Lycopodium. Lycopodium is not not actually a crop species, but serves as a good test genus due to the limited amount of species in this genus (and thus the short workflow execution runtime). Lycopodium is a genus of clubmosses within the family Lycopodiaceae. These perennial, evergreen plants are characterized by their small, needle-like or scale-like leaves arranged in spirals or whorls along the stems. Lycopodium species reproduce via spores rather than seeds and often form dense mats in forests, particularly in moist, shaded environments.",
+      "hasPart": [
+        {
+          "@id": "workflow.yaml"
+        }
+      ],
+      "keywords": [
+        "ModGP",
+        "SDM",
+        "CWR"
+      ],
+      "license": {
+        "@id": "https://spdx.org/licenses/MIT"
+      },
+      "mainEntity": {
+        "@id": "workflow.yaml"
+      }
+    },
+    {
+      "@id": "https://orcid.org/0000-0001-9447-460X",
+      "@type": "Person",
+      "name": "Daniel Bauer",
+      "url": "https://orcid.org/0000-0001-9447-460X"
+    },
+    {
+      "@id": "workflow.yaml",
+      "@type": [
+        "File",
+        "ComputationalWorkflow",
+        "SoftwareSourceCode"
+      ],
+      "name": "workflow.yaml",
+      "description": "Argo workflow definition for crop wild relatives modeling",
+      "encodingFormat": "text/yaml",
+      "input": [
+        {
+          "@id": "#input_genus"
+        },
+        {
+          "@id": "#input_number_of_cores"
+        },
+        {
+          "@id": "#input_cwr_source_repository"
+        },
+        {
+          "@id": "#input_cwr_source_revision"
+        }
+      ],
+      "programmingLanguage": {
+        "@id": "https://argoproj.github.io/workflows"
+      }
+    },
+    {
+      "@id": "#input_genus",
+      "@type": "FormalParameter",
+      "additionalType": "Text",
+      "name": "species",
+      "description": "Genus of species for distribution modeling",
+      "valueRequired": "true",
+      "workExample": {"@id": "#genus"}
+    },
+    {
+      "@id": "#input_number_of_cores",
+      "@type": "FormalParameter",
+      "additionalType": "Integer",
+      "name": "numberOfCores",
+      "description": "Number of cores to use for SDM calculation",
+      "valueRequired": "true",
+      "workExample": {"@id": "#number_of_cores"}
+    },
+    {
+      "@id": "#input_cwr_source_repository",
+      "@type": "FormalParameter",
+      "additionalType": "Text",
+      "description": "URL of CWR source repository",
+      "name": "modgpSource",
+      "valueRequired": "true",
+      "workExample": {"@id": "#source"}
+    },
+    {
+      "@id": "#input_cwr_source_revision",
+      "@type": "FormalParameter",
+      "additionalType": "Text",
+      "description": "Revision of CWR source",
+      "name": "modgpRevision",
+      "workExample": {"@id": "#revision"}
+    },
+    {
+        "@id": "https://argoproj.github.io/workflows",
+        "@type": "ComputerLanguage",
+        "name": "Argo",
+        "url": "https://argoproj.github.io/workflows"
+    }
+  ]
+}
