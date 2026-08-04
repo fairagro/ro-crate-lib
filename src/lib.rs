@@ -11,6 +11,7 @@ pub mod build;
 pub mod constants;
 pub mod context;
 pub mod graph;
+pub mod io;
 pub mod profile;
 pub mod terms;
 pub mod validate;

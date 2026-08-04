@@ -12,7 +12,14 @@ serde_json = "1.0.151"
 miette = { version = "7.6.0", features = ["derive"] }
 thiserror = "2.0.19"
 bon = "3.9.3"
+zip = { version = "8.6.0", default-features = false, features = ["deflate"], optional = true }
 
 [dev-dependencies]
 miette = { version = "7.6.0", features = ["fancy"] }
 rstest = "0.26.1"
+tempfile = "3.27.0"
+zip = "8.6.0"
+
+[features]
+default = ["zip"]
+zip = ["dep:zip"]
