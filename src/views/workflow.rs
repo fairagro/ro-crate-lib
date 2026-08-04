@@ -21,7 +21,8 @@ impl<'a> Workflow<'a> {
     }
 
     pub fn version(&self) -> Option<&'a str> {
-        self.text("version").or_else(|| self.text("softwareVersion"))
+        self.text("version")
+            .or_else(|| self.text("softwareVersion"))
     }
 
     pub fn url(&self) -> Option<&'a str> {

@@ -4,11 +4,13 @@ use crate::{
 };
 
 mod base;
+mod test;
 mod workflow;
 pub use base::{
     ComputerLanguage, ControlAction, CreateAction, FormalParameter, HowToStep, Organization,
     OrganizeAction, Person, RootDataset, SoftwareApplication,
 };
+pub use test::{TestInstance, TestService, TestSuite};
 pub use workflow::Workflow;
 
 pub trait View<'a>: Sized {

@@ -43,7 +43,7 @@ impl Context {
         })
     }
 
-     /// The IRI `term` expands to, when the crate defines it inline.
+    /// The IRI `term` expands to, when the crate defines it inline.
     pub fn definition(&self, term: &str) -> Option<&str> {
         self.items().find_map(|entry| match entry {
             ContextItem::Definitions(definitions) => definitions.get(term).map(String::as_str),
