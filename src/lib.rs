@@ -7,6 +7,7 @@ use crate::{
 use serde::{Deserialize, Serialize};
 use std::collections::VecDeque;
 
+pub mod build;
 pub mod constants;
 pub mod context;
 pub mod graph;
