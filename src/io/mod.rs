@@ -58,6 +58,9 @@ pub enum Error {
 
 impl RoCrate {
     /// Reads the metadata file of a crate directory.
+    ///
+    /// # Errors
+    /// Path does not exists or file is not readable
     pub fn from_directory(directory: impl AsRef<Path>) -> Result<Self> {
         let directory = directory.as_ref();
         let path = metadata_path(directory).ok_or_else(|| Error::NoMetadata {
@@ -68,6 +71,9 @@ impl RoCrate {
 
     /// Writes the metadata file into `directory`, creating it if needed, and
     /// returns the path written. Payload files are left alone.
+    /// 
+    /// # Errors
+    /// Path is not writable
     pub fn write_directory(&self, directory: impl AsRef<Path>) -> Result<PathBuf> {
         let directory = directory.as_ref();
         std::fs::create_dir_all(directory)?;

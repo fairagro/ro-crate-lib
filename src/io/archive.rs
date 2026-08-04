@@ -15,6 +15,11 @@ impl RoCrate {
     ///
     /// Archives that wrap the crate in a top-level folder are read too: the
     /// shallowest metadata file wins.
+    ///
+    /// # Errors
+    /// File does not exist
+    /// or
+    /// File is not readable
     pub fn from_zip(path: impl AsRef<Path>) -> Result<Self> {
         let path = path.as_ref();
         let mut archive = ZipArchive::new(File::open(path)?)?;
@@ -36,6 +41,7 @@ impl RoCrate {
     /// Packs the crate: the metadata file, plus every part of the crate read
     /// from `source`.
     ///
+    /// # Errors
     /// Fails on a part that `source` does not hold — check first with
     /// [`RoCrate::missing_parts`] if a crate may be incomplete.
     pub fn write_zip(&self, path: impl AsRef<Path>, source: impl AsRef<Path>) -> Result<()> {
@@ -74,6 +80,11 @@ impl RoCrate {
 }
 
 /// Unpacks an archive into `directory` and reads the crate it holds.
+///
+/// # Errors
+/// File does not exist
+/// or
+/// File is not readable
 pub fn unzip(path: impl AsRef<Path>, directory: impl AsRef<Path>) -> Result<RoCrate> {
     let directory = directory.as_ref();
     let mut archive = ZipArchive::new(File::open(path.as_ref())?)?;

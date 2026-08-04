@@ -28,6 +28,7 @@ pub struct Violation {
 }
 
 impl Violation {
+    #[must_use]
     pub fn must(rule: &'static str, message: impl Into<String>) -> Self {
         Violation {
             level: Level::Must,
@@ -37,19 +38,19 @@ impl Violation {
             advice: None,
         }
     }
-
+    #[must_use]
     pub fn should(rule: &'static str, message: impl Into<String>) -> Self {
         Violation {
             level: Level::Should,
             ..Violation::must(rule, message)
         }
     }
-
+    #[must_use]
     pub fn at(mut self, entity: impl Into<String>) -> Self {
         self.entity = Some(entity.into());
         self
     }
-
+    #[must_use]
     pub fn advise(mut self, advice: impl Into<String>) -> Self {
         self.advice = Some(advice.into());
         self
@@ -135,6 +136,9 @@ impl Validation {
     }
 
     /// The warnings on success, a [`miette`] report on failure.
+    ///
+    /// # Errors
+    /// Crate is Invaloid
     pub fn into_result(self) -> Result<Vec<Violation>, InvalidCrate> {
         if self.is_conformant() {
             return Ok(self.violations);

@@ -53,17 +53,20 @@ impl Entity {
         }
     }
 
+    #[must_use]
     pub fn set(mut self, term: impl Into<String>, value: impl Into<Value>) -> Self {
         self.node.set(term, value);
         self
     }
 
     /// Points `term` at another entity's `@id`.
+    #[must_use]
     pub fn reference(mut self, term: impl Into<String>, id: impl Into<String>) -> Self {
         self.node.set(term, Reference::new(id));
         self
     }
 
+    #[must_use]
     pub fn references<I>(mut self, term: impl Into<String>, ids: I) -> Self
     where
         I: IntoIterator,
@@ -118,6 +121,7 @@ impl RoCrate {
         state_mod = ro_crate_builder,
         finish_fn = build
     )]
+    #[allow(clippy::needless_pass_by_value)]
     pub fn builder(
         #[builder(field)] additions: Vec<Addition>,
         #[builder(field)] profiles: Vec<Profile>,
@@ -228,6 +232,9 @@ impl<S: ro_crate_builder::State> RoCrateBuilder<S> {
 
 impl<S: ro_crate_builder::IsComplete> RoCrateBuilder<S> {
     /// Builds, then holds the crate to the profiles it claims.
+    ///
+    /// # Errors
+    /// Invalid Crate
     pub fn build_checked(self) -> Result<RoCrate, InvalidCrate> {
         let crate_ = self.build();
         crate_.validate().into_result()?;
