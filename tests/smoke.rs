@@ -35,11 +35,11 @@ fn resolves_the_root_and_its_main_workflow(
     #[case] root_id: &str,
     #[case] workflow_id: &str,
 ) {
-    let crate_ = load(fixture);
-    let root = crate_.root().expect("Root entity not found");
+    let rocrate = load(fixture);
+    let root = rocrate.root().expect("Root entity not found");
     assert_eq!(root.id, root_id);
 
-    let workflow = crate_.main_entity().expect("Main workflow not found");
+    let workflow = rocrate.main_entity().expect("Main workflow not found");
     assert_eq!(workflow.id, workflow_id);
     assert!(workflow.has_type("ComputationalWorkflow"));
 }
@@ -48,16 +48,16 @@ fn resolves_the_root_and_its_main_workflow(
 #[case::flat_1_1("wroc_example.json", 3)]
 #[case::nested_datasets("crop_modeling_workflow.json", 19)]
 fn collects_data_entities_through_nested_parts(#[case] fixture: &str, #[case] expected: usize) {
-    let crate_ = load(fixture);
-    assert_eq!(crate_.data_entities().len(), expected);
+    let rocrate = load(fixture);
+    assert_eq!(rocrate.data_entities().len(), expected);
 }
 
 #[rstest]
 fn every_entity_is_root_descriptor_data_or_contextual(#[values(0, 1, 2, 3, 4, 5, 6)] index: usize) {
-    let crate_ = load(FIXTURES[index]);
-    let counted = crate_.data_entities().len() + crate_.contextual_entities().len() + 2;
+    let rocrate = load(FIXTURES[index]);
+    let counted = rocrate.data_entities().len() + rocrate.contextual_entities().len() + 2;
 
-    assert_eq!(counted, crate_.graph.len());
+    assert_eq!(counted, rocrate.graph.len());
 }
 
 #[rstest]
@@ -81,12 +81,12 @@ fn reads_profiles_from_the_descriptor_and_the_root(
     #[case] fixture: &str,
     #[case] expected: &[Profile],
 ) {
-    let crate_ = load(fixture);
-    let profiles = crate_.profiles();
+    let rocrate = load(fixture);
+    let profiles = rocrate.profiles();
 
     for profile in expected {
         assert!(profiles.contains(profile), "{profile:?} missing");
-        assert!(crate_.claims(profile));
+        assert!(rocrate.claims(profile));
     }
     assert_eq!(profiles.len(), expected.len());
 }
@@ -94,8 +94,9 @@ fn reads_profiles_from_the_descriptor_and_the_root(
 #[rstest]
 fn round_trips_through_json(#[values(0, 1, 2, 3, 4, 5, 6)] index: usize) {
     let fixture = FIXTURES[index];
-    let crate_ = load(fixture);
-    let reparsed: RoCrate = serde_json::from_str(&serde_json::to_string(&crate_).unwrap()).unwrap();
+    let rocrate = load(fixture);
+    let reparsed: RoCrate =
+        serde_json::from_str(&serde_json::to_string(&rocrate).unwrap()).unwrap();
 
-    assert_eq!(crate_, reparsed);
+    assert_eq!(rocrate, reparsed);
 }

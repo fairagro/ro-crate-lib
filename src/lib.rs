@@ -12,6 +12,7 @@ pub mod context;
 pub mod graph;
 pub mod profile;
 pub mod terms;
+pub mod views;
 
 /// Parsed representation of ro-crate-metadata.json
 ///
