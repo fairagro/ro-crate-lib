@@ -1,5 +1,6 @@
 [package]
 name = "rocrate"
+description = "A Rust library for reading, writing, building, validating, and navigating RO-Crates."
 version = "0.1.0"
 edition = "2024"
 repository = "https://github.com/fairagro/ro-crate-lib"
