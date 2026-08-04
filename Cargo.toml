@@ -2,17 +2,30 @@
 name = "rocrate"
 version = "0.1.0"
 edition = "2024"
+repository = "https://github.com/fairagro/ro-crate-lib"
+license = "MIT OR Apache-2.0"
+keywords = ["rocrate", "ro-crate", "fairagro"]
+authors = [
+    "Jens Krumsieck",
+    "Antonia Leidel",
+    "Harald von Waldow",
+    "Xaver Stiensmeier",
+    "FAIRagro",
+]
+categories = ["science"]
 
 [dependencies]
+oneormany = { version = "1.1.0", features = ["serde"] }
 serde = { version = "1.0.229", features = ["derive"] }
-oneormany = { version = "1.0.1", features = ["serde"], path = "../oom" }
 iref = { version = "4.2.0", features = ["serde"] }
 indexmap = { version = "2.5.0", features = ["serde"] }
 serde_json = "1.0.151"
 miette = { version = "7.6.0", features = ["derive"] }
 thiserror = "2.0.19"
 bon = "3.9.3"
-zip = { version = "8.6.0", default-features = false, features = ["deflate"], optional = true }
+zip = { version = "8.6.0", default-features = false, features = [
+    "deflate",
+], optional = true }
 
 [dev-dependencies]
 miette = { version = "7.6.0", features = ["fancy"] }
