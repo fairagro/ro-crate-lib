@@ -1,7 +1,10 @@
 use rocrate::{
     RoCrate,
     context::Context,
-    views::{ComputerLanguage, ControlAction, CreateAction, FormalParameter, OrganizeAction, View},
+    views::{
+        ComputerLanguage, ContainerImage, ControlAction, CreateAction, FormalParameter,
+        OrganizeAction, ParameterConnection, View,
+    },
 };
 use rstest::rstest;
 
@@ -188,4 +191,151 @@ fn a_view_only_applies_to_entities_of_its_type() {
     assert!(crate_.view::<CreateAction>("packed.cwl").is_none());
     assert!(crate_.view::<CreateAction>("does-not-exist").is_none());
     assert_eq!(crate_.views::<CreateAction>().len(), 3);
+}
+
+const RUN_CRATE: &str = r##"{
+  "@context": [
+    "https://w3id.org/ro/crate/1.1/context",
+    "https://w3id.org/ro/terms/workflow-run/context"
+  ],
+  "@graph": [
+    {"@id": "ro-crate-metadata.json", "@type": "CreativeWork", "about": {"@id": "./"},
+     "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"}},
+    {"@id": "./", "@type": "Dataset", "hasPart": {"@id": "wf.cwl"},
+     "conformsTo": {"@id": "https://w3id.org/ro/wfrun/provenance/0.5"},
+     "mainEntity": {"@id": "wf.cwl"}, "mentions": {"@id": "#run"}},
+    {"@id": "wf.cwl", "@type": ["File", "SoftwareSourceCode", "ComputationalWorkflow", "HowTo"],
+     "programmingLanguage": {"@id": "#cwl"}, "input": {"@id": "#in"}, "output": {"@id": "#out"},
+     "step": {"@id": "#step1"}, "connection": {"@id": "#conn-out"}},
+    {"@id": "#cwl", "@type": "ComputerLanguage", "name": "CWL"},
+    {"@id": "#in", "@type": "FormalParameter", "additionalType": "File", "name": "in"},
+    {"@id": "#out", "@type": "FormalParameter", "additionalType": "File", "name": "out"},
+    {"@id": "#tool-in", "@type": "FormalParameter", "additionalType": "File", "name": "tool-in"},
+    {"@id": "#tool-out", "@type": "FormalParameter", "additionalType": "File", "name": "tool-out"},
+    {"@id": "#step1", "@type": "HowToStep", "position": "1", "workExample": {"@id": "#tool"},
+     "connection": {"@id": "#conn-step"}},
+    {"@id": "#tool", "@type": "SoftwareApplication", "name": "samtools", "version": "1.9"},
+    {"@id": "#conn-step", "@type": "ParameterConnection",
+     "sourceParameter": {"@id": "#in"}, "targetParameter": {"@id": "#tool-in"}},
+    {"@id": "#conn-out", "@type": "ParameterConnection",
+     "sourceParameter": {"@id": "#tool-out"}, "targetParameter": {"@id": "#out"}},
+    {"@id": "#run", "@type": "CreateAction", "instrument": {"@id": "wf.cwl"},
+     "object": {"@id": "#in-pv"}, "result": {"@id": "#out-pv"},
+     "containerImage": {"@id": "#image"}, "environment": {"@id": "#env"}},
+    {"@id": "#image", "@type": "ContainerImage",
+     "additionalType": {"@id": "https://w3id.org/ro/terms/workflow-run#DockerImage"},
+     "registry": "docker.io", "name": "biocontainers/samtools", "tag": "v1.9-4-deb_cv1",
+     "sha256": "da61624fda230e94867c9429ca1112e1e77c24e500b52dfc84eaf2f5820b4a2a"},
+    {"@id": "#in-pv", "@type": "PropertyValue", "name": "in", "value": "hello",
+     "exampleOfWork": {"@id": "#in"}},
+    {"@id": "#out-pv", "@type": "PropertyValue", "name": "out", "value": "world"},
+    {"@id": "#env", "@type": "PropertyValue", "name": "HEIGHT_LIMIT", "value": "1000px"}
+  ]
+}"##;
+
+fn run_crate() -> RoCrate {
+    serde_json::from_str(RUN_CRATE).unwrap()
+}
+
+#[test]
+fn a_run_reports_its_container_and_environment() {
+    let crate_ = run_crate();
+    let run = crate_.root_dataset().unwrap().actions().remove(0);
+
+    let image = run.container_images().remove(0);
+    assert_eq!(image.name(), Some("biocontainers/samtools"));
+    assert_eq!(image.registry(), Some("docker.io"));
+    assert_eq!(image.tag(), Some("v1.9-4-deb_cv1"));
+    assert_eq!(
+        image.kind(),
+        Some("https://w3id.org/ro/terms/workflow-run#DockerImage")
+    );
+    assert!(image.sha256().is_some());
+    assert_eq!(image.md5(), None);
+
+    let environment = run.environment();
+    assert_eq!(environment.len(), 1);
+    assert_eq!(environment[0].name(), Some("HEIGHT_LIMIT"));
+    assert_eq!(environment[0].text_value(), Some("1000px"));
+}
+
+#[test]
+fn parameter_values_link_back_to_the_parameter_they_fill() {
+    let crate_ = run_crate();
+    let run = crate_.root_dataset().unwrap().actions().remove(0);
+
+    let inputs = run.object_values();
+    assert_eq!(inputs.len(), 1);
+    assert_eq!(inputs[0].text_value(), Some("hello"));
+    assert_eq!(
+        inputs[0].example_of_work().map(|p| p.id.as_str()),
+        Some("#in")
+    );
+    assert_eq!(run.result_values()[0].text_value(), Some("world"));
+}
+
+#[test]
+fn connections_hang_off_the_workflow_and_its_steps() {
+    let crate_ = run_crate();
+    let workflow = crate_.workflow().unwrap();
+
+    let into_output = workflow.connections();
+    assert_eq!(into_output.len(), 1);
+    assert_eq!(
+        into_output[0].source().and_then(|p| p.name()),
+        Some("tool-out")
+    );
+    assert_eq!(into_output[0].target().and_then(|p| p.name()), Some("out"));
+
+    let step = workflow.steps().remove(0);
+    assert_eq!(step.position(), Some("1"));
+    let between_steps = step.connections();
+    assert_eq!(between_steps.len(), 1);
+    assert_eq!(between_steps[0].source().and_then(|p| p.name()), Some("in"));
+    assert_eq!(
+        between_steps[0].target_node().map(|p| p.id.as_str()),
+        Some("#tool-in")
+    );
+}
+
+#[test]
+fn workflow_run_terms_need_the_workflow_run_context() {
+    let mut crate_ = run_crate();
+    assert_eq!(crate_.views::<ContainerImage>().len(), 1);
+    assert_eq!(crate_.views::<ParameterConnection>().len(), 2);
+
+    crate_.context = Context::ro_crate_1_1();
+
+    assert!(crate_.views::<ContainerImage>().is_empty());
+    assert!(crate_.views::<ParameterConnection>().is_empty());
+    assert!(
+        crate_.workflow().is_some(),
+        "base terms still read without it"
+    );
+}
+
+#[test]
+fn a_testing_crate_reaches_its_suites_through_mentions() {
+    let crate_ = load("nf_core_workflow.json");
+    let root = crate_.root_dataset().unwrap();
+
+    let suites = root.test_suites();
+    assert_eq!(suites.len(), 1);
+    assert_eq!(suites[0].name(), Some("Test suite for nf-core/mag"));
+    assert_eq!(suites[0].main_entity().map(|w| w.id()), Some("main.nf"));
+    assert!(
+        root.actions().is_empty(),
+        "a TestSuite is not a workflow run"
+    );
+
+    let instance = suites[0].instances().remove(0);
+    assert_eq!(
+        instance.resource(),
+        Some("repos/nf-core/mag/actions/workflows/nf-test.yml")
+    );
+    assert_eq!(instance.url(), Some("https://api.github.com"));
+
+    let service = instance.runs_on().expect("no test service");
+    assert_eq!(service.name(), Some("Github Actions"));
+    assert_eq!(service.url(), Some("https://github.com"));
 }

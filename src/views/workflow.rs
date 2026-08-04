@@ -1,13 +1,30 @@
 use crate::{
     define_views,
     graph::node::GraphNode,
-    views::{ComputerLanguage, FormalParameter, HowToStep, Person, View},
+    views::{Person, RootDataset, View},
 };
 
 define_views! {
     Workflow {
         types: ["ComputationalWorkflow"],
         terms: ["programmingLanguage", "input", "output"],
+    }
+
+    ComputerLanguage {
+        types: ["ComputerLanguage"],
+        terms: ["name"],
+    }
+
+    FormalParameter {
+        types: ["FormalParameter"],
+        terms: ["additionalType"],
+    }
+}
+
+impl<'a> RootDataset<'a> {
+    /// The main workflow of a Workflow RO-Crate.
+    pub fn main_entity(&self) -> Option<Workflow<'a>> {
+        self.resolve("mainEntity")
     }
 }
 
@@ -42,11 +59,6 @@ impl<'a> Workflow<'a> {
         self.resolve_all("output")
     }
 
-    /// The steps, when the workflow is also a `HowTo`.
-    pub fn steps(&self) -> Vec<HowToStep<'a>> {
-        self.resolve_all("step")
-    }
-
     pub fn authors(&self) -> Vec<Person<'a>> {
         self.resolve_all("author")
     }
@@ -72,5 +84,54 @@ impl<'a> Workflow<'a> {
 
     pub fn is_based_on(&self) -> Vec<&'a GraphNode> {
         self.nodes("isBasedOn")
+    }
+}
+
+impl<'a> ComputerLanguage<'a> {
+    pub fn name(&self) -> Option<&'a str> {
+        self.text("name")
+    }
+
+    pub fn alternate_name(&self) -> Option<&'a str> {
+        self.text("alternateName")
+    }
+
+    pub fn version(&self) -> Option<&'a str> {
+        self.text("version")
+    }
+
+    pub fn url(&self) -> Option<&'a str> {
+        self.text("url")
+            .or_else(|| self.ref_ids("url").into_iter().next())
+    }
+
+    pub fn identifier(&self) -> Option<&'a str> {
+        self.text("identifier")
+            .or_else(|| self.ref_ids("identifier").into_iter().next())
+    }
+}
+
+impl<'a> FormalParameter<'a> {
+    pub fn name(&self) -> Option<&'a str> {
+        self.text("name")
+    }
+
+    /// The parameter's data type, e.g. `File` or `Integer`.
+    pub fn additional_type(&self) -> Option<&'a str> {
+        self.text("additionalType")
+    }
+
+    pub fn default_value(&self) -> Option<&'a str> {
+        self.text("defaultValue")
+    }
+
+    pub fn encoding_formats(&self) -> Vec<&'a str> {
+        let mut formats = self.texts("encodingFormat");
+        formats.extend(self.ref_ids("encodingFormat"));
+        formats
+    }
+
+    pub fn value_required(&self) -> Option<bool> {
+        self.flag("valueRequired")
     }
 }

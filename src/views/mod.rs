@@ -4,14 +4,20 @@ use crate::{
 };
 
 mod base;
+mod run;
 mod test;
 mod workflow;
-pub use base::{
-    ComputerLanguage, ControlAction, CreateAction, FormalParameter, HowToStep, Organization,
-    OrganizeAction, Person, RootDataset, SoftwareApplication,
+/// Base RO-Crate.
+pub use base::{Organization, Person, PropertyValue, RootDataset};
+/// Workflow Run Crate, and its Process and Provenance siblings.
+pub use run::{
+    ContainerImage, ControlAction, CreateAction, HowToStep, OrganizeAction, ParameterConnection,
+    SoftwareApplication,
 };
-pub use test::{TestInstance, TestService, TestSuite};
-pub use workflow::Workflow;
+/// Workflow testing (`https://w3id.org/ro/terms/test`).
+pub use test::{TestDefinition, TestInstance, TestService, TestSuite};
+/// Workflow RO-Crate.
+pub use workflow::{ComputerLanguage, FormalParameter, Workflow};
 
 pub trait View<'a>: Sized {
     const TYPES: &'static [&'static str];
