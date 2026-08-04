@@ -105,7 +105,7 @@ for step in workflow.steps() {
 ```
 
 ## AI Disclosure
-Claude Code (Opus 5 Model) was used to build the initial scaffold. Initial Code was reviewed and further developed by a human being.
+Claude Code (Opus 5 Model) was used to build the initial scaffold. Code was reviewed and further developed by a human being.
 
 ## License
 Licensed under either of [Apache License, Version 2.0](LICENSE-APACHE) or
