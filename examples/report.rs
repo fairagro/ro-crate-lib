@@ -17,7 +17,7 @@ fn main() -> std::io::Result<()> {
 
         match validation.into_result() {
             Ok(warnings) => {
-                println!("    conformant, {} warning(s)", warnings.len());
+                println!("    ✅ conformant, {} warning(s)", warnings.len());
                 for warning in warnings {
                     println!("{:?}", Report::new(warning));
                 }

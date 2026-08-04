@@ -159,6 +159,7 @@ pub const BASE_TERMS: &[&str] = &[
     "output",
     "position",
     "programmingLanguage",
+    "publisher",
     "result",
     "sdPublisher",
     "softwareVersion",

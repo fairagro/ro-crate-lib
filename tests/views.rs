@@ -3,7 +3,7 @@ use rocrate::{
     context::Context,
     views::{
         ComputerLanguage, ContainerImage, ControlAction, CreateAction, FormalParameter,
-        OrganizeAction, ParameterConnection, View,
+        OrganizeAction, ParameterConnection, View, Workflow,
     },
 };
 use rstest::rstest;
@@ -338,4 +338,100 @@ fn a_testing_crate_reaches_its_suites_through_mentions() {
     let service = instance.runs_on().expect("no test service");
     assert_eq!(service.name(), Some("Github Actions"));
     assert_eq!(service.url(), Some("https://github.com"));
+}
+
+/// Bioschemas writes `additionalType` as a reference to an ontology term,
+/// where the Workflow Run crates write a plain schema.org name.
+#[test]
+fn a_bioschemas_workflow_reads_like_any_other() {
+    let crate_ = load("wf_bioschemas.json");
+    let workflow = crate_
+        .views::<Workflow>()
+        .pop()
+        .expect("no workflow in the graph");
+
+    assert_eq!(workflow.id(), "workflow/alignment.knime");
+    assert_eq!(workflow.name(), Some("Sequence alignment workflow"));
+    assert_eq!(workflow.version(), Some("0.5.0"));
+    assert_eq!(
+        workflow.url(),
+        Some("http://example.com/workflows/alignment")
+    );
+    assert_eq!(
+        workflow.license(),
+        Some("https://spdx.org/licenses/CC-BY-NC-SA-4.0")
+    );
+
+    let language = workflow.language().expect("no programming language");
+    assert_eq!(language.name(), Some("KNIME Analytics Platform"));
+    assert_eq!(language.alternate_name(), Some("KNIME"));
+    assert_eq!(language.version(), Some("4.1.3"));
+
+    let inputs = workflow.inputs();
+    assert_eq!(inputs.len(), 1);
+    assert_eq!(inputs[0].name(), Some("genome_sequence"));
+    assert_eq!(inputs[0].value_required(), Some(true));
+    assert_eq!(
+        inputs[0].additional_type(),
+        Some("http://edamontology.org/data_2977"),
+        "an ontology term reference reads the same as a schema.org name"
+    );
+
+    let outputs = workflow.outputs();
+    assert_eq!(outputs.len(), 2);
+    assert_eq!(
+        outputs[0].encoding_formats(),
+        ["http://edamontology.org/format_2572"]
+    );
+}
+
+/// A crate about a run of a workflow that lives on the web: the workflow is a
+/// data entity, but nothing nominates it and no run is recorded.
+#[test]
+fn a_crate_can_describe_a_workflow_without_running_or_nominating_it() {
+    let crate_ = load("biocompute.json");
+
+    assert!(crate_.workflow().is_none());
+    assert!(crate_.views::<CreateAction>().is_empty());
+
+    let workflow = crate_
+        .views::<Workflow>()
+        .pop()
+        .expect("the workflow is still in the graph");
+    assert_eq!(
+        workflow.id(),
+        "https://raw.githubusercontent.com/nf-core/chipseq/1.2.1/main.nf"
+    );
+    assert_eq!(workflow.name(), Some("nf-core/chipseq"));
+    assert_eq!(workflow.authors().len(), 11);
+    assert!(
+        workflow.language().is_none(),
+        "this crate names no programming language"
+    );
+
+    let root = crate_.root_dataset().expect("no root dataset");
+    assert_eq!(root.name(), Some("Workflow run of nf-core/chipseq"));
+    assert_eq!(root.license(), Some("https://spdx.org/licenses/CC0-1.0"));
+    assert_eq!(root.authors().len(), 1);
+    assert_eq!(
+        root.publisher().and_then(|p| p.name()),
+        Some("BioCompute Objects")
+    );
+    assert!(root.actions().is_empty());
+}
+
+#[test]
+fn the_smallest_crate_has_a_root_and_nothing_else() {
+    let crate_ = load("minimal.json");
+    let root = crate_.root_dataset().expect("no root dataset");
+
+    assert_eq!(root.date_published(), Some("2017"));
+    assert!(root.name().unwrap().starts_with("Data files associated"));
+    assert_eq!(
+        root.license(),
+        Some("https://creativecommons.org/licenses/by-nc-sa/3.0/au/")
+    );
+    assert!(root.parts().is_empty());
+    assert!(root.main_entity().is_none());
+    assert!(crate_.views::<Workflow>().is_empty());
 }

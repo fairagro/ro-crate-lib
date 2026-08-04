@@ -98,10 +98,13 @@ fn warnings_do_not_cost_conformance() {
 fn the_published_crates_only_miss_dates_and_licenses(
     #[values(
         "argo_workflow.json",
+        "biocompute.json",
         "crop_modeling_workflow.json",
+        "minimal.json",
         "nf_core_workflow.json",
         "proc_wrroc_example.json",
         "prov_wrroc_example.json",
+        "wf_bioschemas.json",
         "wf_wrroc_example.json",
         "wroc_example.json"
     )]
@@ -326,4 +329,41 @@ fn a_failed_validation_becomes_one_report_with_related_violations() {
     );
     assert_eq!(report.related().unwrap().count(), expected);
     assert_eq!(report.violations.len(), expected);
+}
+
+/// The two crates that break no rule at all, at either end of the size range.
+#[rstest]
+#[case::ro_crate_1_0_with_a_deep_tree("biocompute.json")]
+#[case::the_smallest_crate_there_is("minimal.json")]
+fn some_published_crates_are_simply_conformant(#[case] fixture: &str) {
+    let validation = load(fixture).validate();
+
+    assert_eq!(
+        validation.violations,
+        [],
+        "{fixture} should be clean, got {:#?}",
+        validation.violations
+    );
+    assert!(validation.into_result().is_ok());
+}
+
+/// A crate carrying a Bioschemas workflow, but claiming no workflow profile:
+/// only the base rules apply, so the workflow itself goes unchecked.
+#[test]
+fn a_crate_is_only_held_to_the_profiles_it_claims() {
+    let crate_ = load("wf_bioschemas.json");
+    let validation = crate_.validate();
+
+    assert_eq!(
+        validation.errors().map(|v| v.rule).collect::<Vec<_>>(),
+        ["base::root-date-published"]
+    );
+    assert!(!validation.broke("wroc::main-entity"));
+
+    // Held to Workflow RO-Crate, the missing `mainEntity` and licence show up.
+    let as_workflow_crate = crate_.validate_as(&Profile::WorkflowRoCrate("1.0".into()));
+
+    assert!(as_workflow_crate.broke("wroc::main-entity"));
+    assert!(as_workflow_crate.broke("wroc::root-license"));
+    assert!(as_workflow_crate.broke("wroc::descriptor-conforms-to"));
 }

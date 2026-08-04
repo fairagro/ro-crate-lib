@@ -116,9 +116,11 @@ impl<'a> FormalParameter<'a> {
         self.text("name")
     }
 
-    /// The parameter's data type, e.g. `File` or `Integer`.
+    /// The parameter's data type: a schema.org name like `File`, or a
+    /// reference to an ontology term, as Bioschemas crates write it.
     pub fn additional_type(&self) -> Option<&'a str> {
         self.text("additionalType")
+            .or_else(|| self.ref_ids("additionalType").into_iter().next())
     }
 
     pub fn default_value(&self) -> Option<&'a str> {
