@@ -35,6 +35,10 @@ pub trait View<'a>: Sized {
         self.get(term)?.as_str()
     }
 
+    fn flag(&self, term: &str) -> Option<bool> {
+        self.get(term)?.as_bool()
+    }
+
     fn texts(&self, term: &str) -> Vec<&'a str> {
         self.get(term)
             .into_iter()
@@ -66,6 +70,31 @@ pub trait View<'a>: Sized {
             .into_iter()
             .filter_map(|entity| V::try_new(self.rocrate(), entity))
             .collect()
+    }
+}
+
+impl RoCrate {
+    /// A typed view of `id`, when that entity carries the view's types and the
+    /// context defines the terms the view reads.
+    pub fn view<'a, V: View<'a>>(&'a self, id: &str) -> Option<V> {
+        V::try_new(self, self.graph.get(id)?)
+    }
+
+    /// Every entity the view applies to, in document order.
+    pub fn views<'a, V: View<'a>>(&'a self) -> Vec<V> {
+        self.graph
+            .iter()
+            .filter_map(|node| V::try_new(self, node))
+            .collect()
+    }
+
+    pub fn root_dataset(&self) -> Option<RootDataset<'_>> {
+        RootDataset::try_new(self, self.root()?)
+    }
+
+    /// The main workflow of a Workflow RO-Crate.
+    pub fn workflow(&self) -> Option<Workflow<'_>> {
+        Workflow::try_new(self, self.main_entity()?)
     }
 }
 
