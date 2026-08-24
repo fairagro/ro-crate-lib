@@ -68,6 +68,13 @@ impl<'a> Workflow<'a> {
     }
 }
 
+impl<'a> FormalParameter<'a> {
+    #[must_use]
+    pub fn work_example(&self) -> Option<&'a GraphNode> {
+        self.node_at("workExample")
+    }
+}
+
 impl<'a> CreateAction<'a> {
     #[must_use]
     pub fn name(&self) -> Option<&'a str> {
